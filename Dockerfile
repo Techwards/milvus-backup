@@ -11,4 +11,4 @@ WORKDIR /app
 COPY --from=builder /app/milvus-backup .
 COPY --from=builder /app/configs ./configs
 EXPOSE 8080
-ENTRYPOINT ["/app/milvus-backup", "server"]
+ENTRYPOINT ["/app/milvus-backup"]

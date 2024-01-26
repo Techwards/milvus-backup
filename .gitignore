@@ -6,3 +6,4 @@ milvus-backup
 logs/
 
 dist/
+backup/*

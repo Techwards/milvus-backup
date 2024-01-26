@@ -1,6 +1,7 @@
 package paramtable
 
 import (
+	"fmt"
 	"strconv"
 )
 
@@ -107,6 +108,7 @@ func (p *MilvusConfig) initAddress() {
 		panic(err)
 	}
 	p.Address = address
+	fmt.Println("Address is : " + address)
 }
 
 func (p *MilvusConfig) initPort() {
@@ -115,6 +117,7 @@ func (p *MilvusConfig) initPort() {
 		panic(err)
 	}
 	p.Port = port
+	fmt.Println("Port is : " + port)
 }
 
 func (p *MilvusConfig) initUser() {

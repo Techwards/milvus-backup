@@ -59,7 +59,10 @@ type BackupContext struct {
 }
 
 func CreateMilvusClient(ctx context.Context, params paramtable.BackupParams) (gomilvus.Client, error) {
+	fmt.Println("Address : " + params.MilvusCfg.Address)
+	fmt.Println("Port : " + params.MilvusCfg.Port)
 	milvusEndpoint := params.MilvusCfg.Address + ":" + params.MilvusCfg.Port
+	fmt.Println("Endpoint is : " + milvusEndpoint)
 	log.Debug("Start Milvus client", zap.String("endpoint", milvusEndpoint))
 	var c gomilvus.Client
 	var err error
@@ -123,6 +126,8 @@ func CreateBackupContext(ctx context.Context, params paramtable.BackupParams) *B
 }
 
 func (b *BackupContext) getMilvusClient() *MilvusClient {
+	fmt.Println("Address : " + b.params.MilvusCfg.Address)
+	fmt.Println("Port : " + b.params.MilvusCfg.Port)
 	if b.milvusClient == nil {
 		milvusClient, err := CreateMilvusClient(b.ctx, b.params)
 		if err != nil {
@@ -515,6 +520,8 @@ func (b *BackupContext) GetRestore(ctx context.Context, request *backuppb.GetRes
 }
 
 func (b *BackupContext) Check(ctx context.Context) string {
+	fmt.Println("Address : " + b.params.MilvusCfg.Address)
+	fmt.Println("Port : " + b.params.MilvusCfg.Port)
 	version, err := b.getMilvusClient().GetVersion(ctx)
 	if err != nil {
 		return "Failed to connect to milvus " + err.Error()
@@ -529,7 +536,7 @@ func (b *BackupContext) Check(ctx context.Context) string {
 			"backup-rootpath: %s\n",
 		version, b.milvusBucketName, b.milvusRootPath, b.backupBucketName, b.backupRootPath)
 
-	paths, _, err := b.getStorageClient().ListWithPrefix(ctx, b.milvusBucketName, b.milvusRootPath+SEPERATOR, false)
+	paths, _, err := b.getStorageClient().ListWithPrefix(ctx, b.milvusBucketName, b.milvusRootPath, false)
 	if err != nil {
 		return "Failed to connect to storage milvus path\n" + info + err.Error()
 	}
@@ -545,15 +552,15 @@ func (b *BackupContext) Check(ctx context.Context) string {
 
 	CHECK_PATH := "milvus_backup_check_" + time.Now().String()
 
-	err = b.getStorageClient().Write(ctx, b.milvusBucketName, b.milvusRootPath+SEPERATOR+CHECK_PATH, []byte{1})
+	err = b.getStorageClient().Write(ctx, b.milvusBucketName, b.milvusRootPath+CHECK_PATH, []byte{1})
 	if err != nil {
 		return "Failed to connect to storage milvus path\n" + info + err.Error()
 	}
 	defer func() {
-		b.getStorageClient().Remove(ctx, b.milvusBucketName, b.milvusRootPath+SEPERATOR+CHECK_PATH)
+		b.getStorageClient().Remove(ctx, b.milvusBucketName, b.milvusRootPath+CHECK_PATH)
 	}()
 
-	err = b.getStorageClient().Copy(ctx, b.milvusBucketName, b.backupBucketName, b.milvusRootPath+SEPERATOR+CHECK_PATH, b.backupRootPath+SEPERATOR+CHECK_PATH)
+	err = b.getStorageClient().Copy(ctx, b.milvusBucketName, b.backupBucketName, b.milvusRootPath+CHECK_PATH, b.backupRootPath+SEPERATOR+CHECK_PATH)
 	if err != nil {
 		return "Failed to copy file from milvus storage to backup storage\n" + info + err.Error()
 	}
